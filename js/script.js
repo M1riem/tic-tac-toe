@@ -6,24 +6,118 @@ let gamer = 'X';
 let turn = 0;
 let endGame = false;
 
-let field = Array(max).fill(-1);
+let field = Array(max).fill(-1); 
 for(let i = 0; i < max; i++ ) {
 	field[i] = Array(max).fill(-1);
-} 
+}
 //field.forEach((element) => console.log(element) );
+
+let number = 0;
+class GroupHorizontal
+{
+	constructor(j,i) {
+		this.j = j;
+		this.i = i;
+		this.next = null;
+		this.prev = null;
+		this.head = this;
+		number++;
+		this.checkWin();
+	}
+	
+	addNext(j,i) {
+		console.log(`addNext`);
+		console.log(`now  -> j = ${this.j}, i = ${this.i}, next = ${this.next}, prev = ${this.prev}, value = ${field[this.j][this.i]}`);
+		console.log(`next -> j = ${this.j}, i+1 = ${this.i+1}, value = ${field[this.j][this.i+1]}`);
+		
+		if ( (i+1) >= 0) {console.log(`Conditions done i+1 = ${this.i + 1}>=0`); }
+			else{console.log(`Conditions fail i+1 = ${this.i + 1}<0`);}
+		if ( field[j][i] == field[j][i+1] ) {console.log(`Conditions done '${field[this.j][this.i+1]}' == '${field[this.j][this.i]}'`); }
+			else {console.log(`Conditions fail '${field[this.j][this.i+1]}' != '${field[this.j][this.i]}'`); }
+		
+		if ( ( (i+1) < max) && ( field[j][i] == field[j][i+1] ) ) {
+			console.log(`Conditions done`);
+			let newElement = new GroupHorizontal(j, i+1);
+			this.head.next = newElement;
+			newElement.prev = this.head;
+			this.head = newElement;
+			newElement.say();
+			this.say();
+			this.head.addNext(j, i+1);
+		}
+		console.log(`recursion addNext done`);
+	}
+	
+	addPrev(j,i) {
+		console.log(`addPrev`);
+		console.log(`now  -> j = ${this.j}, i = ${this.i}, next = ${this.next}, prev = ${this.prev}, value = ${field[this.j][this.i]}`);
+		console.log(`prev -> j = ${this.j}, i-1 = ${this.i - 1}, value = ${field[this.j][this.i-1]}`);
+		
+		if ( (i-1) >= 0) {console.log(`Conditions done i-1 = ${this.i - 1}>=0`); }
+			else{console.log(`Conditions fail i-1 = ${this.i - 1}<0`);}
+		if ( field[j][i] == field[j][i-1] ) {console.log(`Conditions done '${field[this.j][this.i-1]}' == '${field[this.j][this.i]}'`); }
+			else {console.log(`Conditions fail '${field[this.j][this.i-1]}' != '${field[this.j][this.i]}'`); }
+		
+		if ( ( (i-1) >= 0) && ( field[j][i] == field[j][i-1] ) ) {
+			console.log(`Conditions done`);
+			let newElement = new GroupHorizontal(j, i-1);
+			this.head.prev = newElement;
+			newElement.next = this.head;
+			this.head = newElement;
+			newElement.say();
+			this.say();
+			this.head.addPrev(j, i-1);
+		}
+		console.log(`recursion addPrev done`);
+	}
+	checkWin() {
+		if (number == max) {
+			alert(`Win ${field[this.j][this.i]}!`);
+			endGame=true;
+		}
+	}
+
+	say() {
+		console.log(`j = ${this.j}, i = ${this.i}, next = ${this.next}, prev = ${this.prev}, value = ${field[this.j][this.i]}, amount = ${number}`);
+	}
+	
+}
 
 document.getElementById("canvas").addEventListener("mousedown", function (e) {
 	if ( endGame ) return; 
 	let coords = getRelativeCoordinates(e, canvas);
 	let i = Math.floor( coords.x/delta );
 	let j = Math.floor( coords.y/delta );
-	//drawO(i*delta + Math.ceil(delta/2), j*delta + Math.ceil(delta/2), Math.ceil(delta/2) - Math.floor(delta/6));
-	//drawX(i*delta + Math.ceil(delta/2), j*delta+ Math.ceil	(delta/2), Math.ceil(delta/2) - Math.ceil(delta/4));
+	
+	if (field[j][i] != -1) return;
+	field[j][i] = gamer;
+	
+	let horizontal = new GroupHorizontal( j, i);
+	//horizontal.say();
+	horizontal.addNext(j,i);
+	horizontal.addPrev(j,i);
+	console.log("-------------------------------------------------------------------------------------------------");
+	number = 0;
+	
+	if (gamer == 'X') {
+		drawX(i*delta + Math.ceil(delta/2), j*delta + Math.ceil(delta/2), Math.ceil(delta/2) - Math.ceil(delta/4));
+		gamer = 'O';
+	}
+	else{
+		drawO(i*delta + Math.ceil(delta/2), j*delta + Math.ceil(delta/2), Math.ceil(delta/2) - Math.floor(delta/6));
+		gamer = 'X';
+	}
+} );
+
+/*document.getElementById("canvas").addEventListener("mousedown", function (e) {
+	if ( endGame ) return; 
+	let coords = getRelativeCoordinates(e, canvas);
+	let i = Math.floor( coords.x/delta );
+	let j = Math.floor( coords.y/delta );
 	
 	if (field[j][i] != -1) return;
 		//console.log(`i:${i}, j:${j} <=> field[${i}][${j}] = ${field[i][j]} <=> X: ${coords.x}, Y: ${coords.y}`);
-		//alert("Cell's busy!")
-
+		
 	field[j][i] = gamer;
 	turn++;
 	if (turn >= 5)  checkWinner();
@@ -37,7 +131,7 @@ document.getElementById("canvas").addEventListener("mousedown", function (e) {
 		gamer = 'X';
 	}
 	//console.log(`i:${i}, j:${j} <=> X: ${coords.x}, Y: ${coords.y}`);
-} );
+} );*/
 	
 function checkWinner() {
 	let win = 0;
